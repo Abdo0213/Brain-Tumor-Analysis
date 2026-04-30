@@ -4,6 +4,7 @@ from PIL import Image
 import tensorflow as tf
 from skimage.transform import resize
 import os
+from io import BytesIO
 from datetime import datetime
 import cv2
 
@@ -509,15 +510,18 @@ if uploaded_file is not None:
             mask_image = Image.fromarray((pred_mask_binary[..., 0] * 255).astype(np.uint8))
             
             output_image_path = os.path.join(output_dir, f"mask_{uploaded_file.name}")
-            # if st.download_button(
-            #     "Download Mask",
-            #     data=mask_image.tobytes(),
-            #     file_name=os.path.basename(output_image_path),
-            #     mime="image/png",
-            #     help="Click to download and save the mask"
-            # ):
-            #     mask_image.save(output_image_path)
-            #     show_box(f"Mask has been saved to {output_image_path}", "Saved")
+            png_buffer = BytesIO()
+            mask_image.save(png_buffer, format="PNG")
+            mask_filename = f"mask_{os.path.splitext(uploaded_file.name)[0]}.png"
+            if st.download_button(
+                "Download Mask",
+                data=png_buffer.getvalue(),
+                file_name=mask_filename,
+                mime="image/png",
+                help="Click to download and save the mask"
+            ):
+                mask_image.save(os.path.join(output_dir, mask_filename))
+                show_box(f"Mask has been saved to {os.path.join(output_dir, mask_filename)}", "Saved")
 
         except Exception as e:
             show_box(f"Error during segmentation prediction: {e}", "Error")
@@ -543,16 +547,16 @@ if uploaded_file is not None:
             result_content = f"Prediction: {pred_class}\nConfidence: {confidence:.2%}"
             output_text_path = os.path.join(output_dir, f"result_{uploaded_file.name}.txt")
             
-            # if st.download_button(
-            #     "Download Result",
-            #     data=result_content,
-            #     file_name=os.path.basename(output_text_path),
-            #     mime="text/plain",
-            #     help="Click to download and save the result"
-            # ):
-            #     with open(output_text_path, "w", encoding="utf-8") as f:
-            #         f.write(result_content)
-            #     show_box(f"Result has been saved to {output_text_path}", "Saved")
+            if st.download_button(
+                "Download Result",
+                data=result_content.encode("utf-8"),
+                file_name=os.path.basename(output_text_path),
+                mime="text/plain",
+                help="Click to download and save the result"
+            ):
+                with open(output_text_path, "w", encoding="utf-8") as f:
+                    f.write(result_content)
+                show_box(f"Result has been saved to {output_text_path}", "Saved")
 
         except Exception as e:
             show_box(f"Error during classification prediction: {e}", "Error")
