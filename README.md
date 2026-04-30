@@ -1,4 +1,3 @@
-`markdown
 # 🧠 MRI Brain Tumor Analysis & Diagnostics
 
 An advanced **Streamlit-based medical imaging platform** designed for automated brain tumor detection, segmentation, and clinical feature extraction from MRI scans. This project bridges the gap between traditional Computer Vision and modern Deep Learning.
